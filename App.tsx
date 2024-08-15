@@ -1,11 +1,11 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { RootStackParamList, StackOptionList } from './Types';
 import HomeScreen from "./screen/HomeScreen";
-import AnimalScreen from "./screen/AnimalScreen";
+import ArticleScreen from "./screen/ArticleScreen";
+import AuthorScreen from "./screen/AuthorScreen";
 
-const Stack = createStackNavigator<RootStackParamList>();
+const Stack = createStackNavigator<any>();
 
 const App = () => {
   return(
@@ -17,8 +17,13 @@ const App = () => {
           options={{title:'HomeScreen', ...styles}}>
         </Stack.Screen>
         <Stack.Screen 
-          name="Animal" 
-          component={AnimalScreen} 
+          name="Article" 
+          component={ArticleScreen} 
+          options={styles}>
+        </Stack.Screen>
+        <Stack.Screen 
+          name="Author"
+          component={AuthorScreen}
           options={styles}>
         </Stack.Screen>
       </Stack.Navigator>
@@ -26,15 +31,15 @@ const App = () => {
   )
 }
 
-const styles: StackOptionList = ({
+const styles: any = ({
   headerTitleAlign:'center',
   headerStyle: {
-      backgroundColor: '#f4511e',
+      backgroundColor: '#3846ab',
     },
   headerTintColor: '#fff',
   headerTitleStyle: {
-    fontFamily: 'Anta-Regular'
+    fontWeight: 'bold',
   }
-})
+});
 
 export default App;
