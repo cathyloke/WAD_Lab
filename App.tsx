@@ -5,107 +5,112 @@ import {
   Text,
   TextInput,
 } from 'react-native';
+import calculateDistance, { calculateMidPoint } from './Calculation';
+
+const random = (min:number, max:number) => {
+  const num = Math.floor(Math.random() * (max - min + 1)) + min;
+  return num.toString();
+}
 
 const App = () => {
-  //initialize the states of the App component to 0
-  const [x,setX] = useState<string>('0');
-  const [y,setY] = useState<string>('0');
-  const [z, setZ] = useState<string>('0');
-  const [sum,setSum] = useState<string>('0');
-  const [difference,setDifference] = useState<string>('0');
-  const [multiplication, setMultiplication] = useState<string>('0');
+  const [x1,setX1] = useState<string>(random(-10,10));
+  const [y1,setY1] = useState<string>(random(-10,10));
+  const [x2,setX2] = useState<string>(random(-10,10));
+  const [y2,setY2] = useState<string>(random(-10,10));
+  const [midPoint, setMidPoint] = useState<string>(calculateMidPoint(x1,y1,x2,y2));
+  const [distance, setDistance] = useState<string>(calculateDistance(x1,y1,x2,y2));
+
+  const calculation = (inputX1:string, inputY1:string, inputX2:string, inputY2:string) => {
+    setMidPoint(calculateMidPoint(inputX1, inputY1, inputX2, inputY2));
+    setDistance(calculateDistance(inputX1, inputY1, inputX2, inputY2));
+  }
 
     return (
-      <View>  
-        <View style={{alignItems: 'center'}}> 
-          <Text style={styles.title}>Simple Calculator</Text>
+      <View>
+        <View style={{alignItems: 'center'}}>
+          <Text style={styles.title}>Coordinate Calculator</Text>
         </View>
-        
         <View style={styles.container}>
           <Text style={styles.label}>
-            First Number X
+            X1
           </Text>
           <TextInput
             style={styles.input}
             onChangeText={(input) => {
-                setX(input);                                          //set x state value
-                setSum((Number(input) + Number(y) + Number(z)).toString());       //set the sum state value
-                setDifference((Number(input) - Number(y) - Number(z)).toString());//set the difference state value
-                setMultiplication((Number(input) * Number(y) * Number(z)).toString());
+                setX1(input);
+                calculation(input,y1,x2,y2);
                 }
               }
-            value={x}                 //set the value of the TextInput
-            keyboardType={'numeric'}
-            selectTextOnFocus={true} //when user tap on it, all the text within the input field will be selected
-          />
-        </View>
-
-        <View style={styles.container}>
-          <Text style={styles.label}>
-            Second Number Y
-          </Text>
-          <TextInput
-            style={styles.input}
-            onChangeText={(input) => {
-              setY(input);
-              setSum((Number(x) + Number(input) + Number(z)).toString());
-              setDifference((Number(x) - Number(input) - Number(z)).toString());
-              setMultiplication((Number(x) * Number(input) * Number(z)).toString());
-              }
-            }
-            value={y}
+            value={x1}
             keyboardType={'numeric'}
             selectTextOnFocus={true}
           />
         </View>
-
         <View style={styles.container}>
           <Text style={styles.label}>
-            Third Number Z
+            Y1
           </Text>
           <TextInput
             style={styles.input}
             onChangeText={(input) => {
-              setZ(input);
-              setSum((Number(x) + Number(y) + Number(input)).toString());
-              setDifference((Number(x) - Number(y) - Number(input)).toString());
-              setMultiplication((Number(x) * Number(y) * Number(input)).toString());
+              setY1(input);
+              calculation(x1,input,x2,y2);
               }
             }
-            value={z}
+            value={y1}
+            keyboardType={'numeric'}
+            selectTextOnFocus={true}
+          />
+        </View>
+        <View style={styles.container}>
+          <Text style={styles.label}>
+            X2
+          </Text>
+          <TextInput
+            style={styles.input}
+            onChangeText={(input) => {
+              setX2(input);
+              calculation(x1,y1,input,y2);
+              }
+            }
+            value={x2}
+            keyboardType={'numeric'}
+            selectTextOnFocus={true}
+          />
+        </View>
+        <View style={styles.container}>
+          <Text style={styles.label}>
+            Y2
+          </Text>
+          <TextInput
+            style={styles.input}
+            onChangeText={(input) => {
+              setY2(input);
+              calculation(x1,y1,x2,input);
+              }
+            }
+            value={y2}
             keyboardType={'numeric'}
             selectTextOnFocus={true}
           />
         </View>
         <View style={[styles.container,{paddingTop: 50}]}>
           <Text style={[styles.label,{color:'#B71C1C'}]}>
-            Sum
+            Midpoint
           </Text>
           <TextInput
             style={styles.result}
-            value={sum}
-            editable={false}      //to prevent user input
-          />
-        </View>
-
-        <View style={styles.container}>
-          <Text style={[styles.label,{color:'#B71C1C'}]}>
-            Difference
-          </Text>
-          <TextInput
-            style={styles.result}
-            value={difference}
+            value={midPoint}
             editable={false}
           />
         </View>
-
         <View style={styles.container}>
           <Text style={[styles.label,{color:'#B71C1C'}]}>
-            Multiplication
+            Distance
           </Text>
           <TextInput
             style={styles.result}
-            value={multiplication}
+            value={distance}
             editable={false}
           />
         </View>
