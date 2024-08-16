@@ -1,117 +1,113 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, TextInput, Text, ScrollView, TouchableNativeFeedback } from 'react-native';
+import {InputWithLabel, PickerWithLabel} from './UI';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+let animalsData = [
+  {
+    key: '112',
+    value: 'Kangaroo',
+  },
+  {
+    key: '222',
+    value: 'Koala',
+  },
+  {
+    key: '333',
+    value: 'Cat',
+  },
+  {
+    key: '444',
+    value: 'Dog',
+  },
+];
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const App = () => {
+  const [animals,setAnimals] = useState<any[]>([]);
+  const [animal,setAnimal] = useState('112');
+  const [selectedAnimalCode,setSelectedAnimalCode] = useState('');
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  useEffect(()=>{                           //animal list
+    setAnimals(animalsData);
+  },[]);
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const handleShowCode = () => {            //function to handle when the TouchableNativeFeedback was click
+    const selectedAnimal = animals.find( (item:any) => item.key === animal);
+    if (selectedAnimal) {
+      setSelectedAnimalCode(selectedAnimal.value);
+    }
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+    <ScrollView>
+      
+      <PickerWithLabel                      //picker list from the animal list 
+        label="Animal:"
+        items={animals}                     //animal list
+        orientation={'horizontal'}
+        prompt='Select Favourite Animal'
+        selectedValue={ animal }
+        onValueChange={(itemValue:any) => {
+          setAnimal(itemValue);
+        }}
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+      
+      <InputWithLabel                 //to display the animal code only
+          label="Value:"
+          orientation={'horizontal'}
+          placeholder="type here"
+          value={animal}
+          editable={false}    
+      />
+
+      <View style={styles.container}>
+        <TouchableNativeFeedback onPress={handleShowCode}>
+          <View style={styles.button}>
+            <Text style={styles.buttonText}>Click Me</Text>
+          </View>
+        </TouchableNativeFeedback>
+      </View>
+
+      {selectedAnimalCode ? (
+        <View style={styles.container}>
+          <Text style={styles.label}>Selected Animal:</Text>
+          <TextInput
+            style={styles.input}
+            value={selectedAnimalCode}
+            editable={false} // Make the TextInput read-only
+          />
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      ) : null}
+
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    height: 100,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
+  label: {
+    flex: 1,
     fontSize: 18,
-    fontWeight: '400',
+    fontWeight: 'bold',
+    marginLeft: 3,
+    textAlignVertical: 'center',
   },
-  highlight: {
-    fontWeight: '700',
+  input: {
+    flex: 3,
+    // right:20,
+    fontSize: 20,
+    color: 'blue',
+  },
+  button: {
+    backgroundColor: '#286090',
+    padding: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    fontSize: 18,
+    color: 'white',
+    textAlign: 'center',
   },
 });
 
