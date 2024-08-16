@@ -1,118 +1,124 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React from "react";
+import { View, StyleSheet, Text, TouchableOpacity, Image, Dimensions } from "react-native";
+import ProfileScreen from "./screens/ProfileScreen";
+import WelcomeScreen from "./screens/WelcomeScreen";
+import { DrawerContentScrollView, DrawerItemList, createDrawerNavigator } from "@react-navigation/drawer";
+import { NavigationContainer } from "@react-navigation/native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const Drawer = createDrawerNavigator();
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const App = () => {
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
+    return(
+      <NavigationContainer>
+        <Drawer.Navigator
+          drawerContent={props=> <CustomDrawerComponent {...props}/>}
+          screenOptions={{
+            drawerActiveTintColor: 'darkslateblue',
+            drawerActiveBackgroundColor: 'pink',
+          }}
+        >
+          <Drawer.Screen 
+            name="Welcome"
+            component={WelcomeScreen}
+            options={{
+              drawerIcon: ({color}) => (
+                <Ionicons name="home-outline" size={20} color={color} />
+              ),
+              drawerLabelStyle:{
+                fontSize: 23
+              }
+            }}
+          />
+          <Drawer.Screen 
+            name="Profile"
+            component={ProfileScreen}
+            options={{
+              drawerIcon: ({color}) => (
+                <Ionicons name="man-outline" size={20} color={color} />
+              ),
+              drawerLabelStyle:{
+                fontSize: 23
+              }
+            }}  
+          />  
+        </Drawer.Navigator>
+      </NavigationContainer>
+    );
 }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+const CustomDrawerComponent = ( props: any ) => {
+  const windowHeight = Dimensions.get('window').height;
+    return(
+        <DrawerContentScrollView>
+          <View style={{height:"100%"}}>
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+            <View style={{alignItems:'center', justifyContent: 'center', backgroundColor: '#eb4034'}}>
+              <Image
+                style={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: 15,
+                }}
+                source={require('./img/profilePic.jpg')}
+              />
+              <Text>My Profile Picture</Text>
+            </View>
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+            <View style={{backgroundColor: '#fff', paddingTop: 10, height: windowHeight * .75}}>
+              <DrawerItemList {...props} />
+            </View>
+
+            <View style={{
+              borderTopWidth: 1, 
+              borderTopColor: 'gray',
+             }}>
+              <TouchableOpacity>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginLeft: 20,
+
+                    }}>
+                    <Ionicons name="exit-outline" size={23}/>  
+                    <Text
+                      style={{
+                        marginLeft: 20,
+                        fontSize: 23,
+                      }}>
+                      Logout
+                    </Text>
+                  </View>
+              </TouchableOpacity>
+            </View>
+
+          </View>
+        </DrawerContentScrollView>
+    );
 }
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+const inputStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    //backgroundColor: 'lightblue',
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  text: {
+    fontSize: 48,
+    color: 'black'
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  input: {
+    textAlign: 'center',
+    marginRight: 20
   },
-  highlight: {
-    fontWeight: '700',
-  },
+  row: {
+    flexDirection: 'row',
+    flex: 1,
+    justifyContent: 'flex-start',
+    marginBottom: 10
+  }
 });
 
 export default App;
