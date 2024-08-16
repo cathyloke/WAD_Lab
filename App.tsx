@@ -1,118 +1,152 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, { useState } from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
   StyleSheet,
-  Text,
-  useColorScheme,
   View,
+  Text,
+  TextInput,
 } from 'react-native';
+import calculateDistance, { calculateMidPoint } from './Calculation';
+import { InputWithLabel, AppButton } from './UI';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
+const random = (min:number, max:number) => {
+  const num = Math.floor(Math.random() * (max - min + 1)) + min;
+  return num.toString();
 }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+const App = () => {
+  const [x1,setX1] = useState<string>(random(-10,10));
+  const [y1,setY1] = useState<string>(random(-10,10));
+  const [x2,setX2] = useState<string>(random(-10,10));
+  const [y2,setY2] = useState<string>(random(-10,10));
+  const [midPoint, setMidPoint] = useState<string>(calculateMidPoint(x1,y1,x2,y2));
+  const [distance, setDistance] = useState<string>(calculateDistance(x1,y1,x2,y2));
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  const calculation = (inputX1:string, inputY1:string, inputX2:string, inputY2:string) => {
+    setMidPoint(calculateMidPoint(inputX1, inputY1, inputX2, inputY2));
+    setDistance(calculateDistance(inputX1, inputY1, inputX2, inputY2));
+  }
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+    return (
+      <View>
+        <View style={{alignItems: 'center'}}>
+          <Text style={styles.title}>Coordinate Calculator</Text>
         </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
+        <View style={styles.row}>
+          <InputWithLabel
+            label={'X1:'}
+            orientation={'horizontal'}
+            placeholder="type here"
+            inputStyle={styles.input}
+            keyboardType='numeric'
+            value={x1}
+            onChangeText={(x1:string) =>
+              setX1(x1)
+            }
+          />
+          <InputWithLabel
+            label={'X2:'}
+            orientation={'horizontal'}
+            inputStyle={styles.input}
+            keyboardType='numeric'
+            value={x2}
+            onChangeText={(x2:string) =>
+              setX2(x2)
+            }
+          />
+        </View>
+
+        <View style={[styles.row,{borderTopColor:'black', borderTopWidth:3}]}>
+          <InputWithLabel
+            label={'Y1:'}
+            orientation={'horizontal'}
+            inputStyle={styles.input}
+            keyboardType='numeric'
+            value={y1}
+            onChangeText={(y1:string) =>
+              setY1(y1)
+            }
+          />
+          <InputWithLabel
+            label={'Y2:'}
+            orientation={'horizontal'}
+            inputStyle={styles.input}
+            keyboardType='numeric'
+            value={y2}
+            onChangeText={(y2:string) =>
+              setY2(y2)
+            }
+          />
+        </View>
+
+        <AppButton 
+          onPress={ () => {
+            calculation(x1,y1,x2,y2);
+          }
+          }
+          title='Click Me'
+        />
+
+        <View style={[styles.container,{paddingTop: 50}]}>
+          <Text style={[styles.label,{color:'#B71C1C'}]}>
+            Midpoint
+          </Text>
+          <TextInput
+            style={styles.result}
+            value={midPoint}
+            editable={false}
+          />
+        </View>
+        <View style={styles.container}>
+          <Text style={[styles.label,{color:'#B71C1C'}]}>
+            Distance
+          </Text>
+          <TextInput
+            style={styles.result}
+            value={distance}
+            editable={false}
+          />
+        </View>
+      </View>
+    );
+};
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  title: {
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 30
   },
-  sectionTitle: {
+  label: {
+    color: '#E53935',
+    fontWeight: 'bold',
     fontSize: 24,
-    fontWeight: '600',
+    margin: 5,
+
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  input: {
+    color: 'black',
+    fontSize: 24,
+    margin: 5,
+    textAlign: 'right',
+    borderColor: 'black',
+    borderWidth: 1,
+    borderRadius: 10,
+    width: 100,
   },
-  highlight: {
-    fontWeight: '700',
+  result: {
+    color: 'green',
+    fontSize: 24,
+    fontWeight: 'bold',
+    margin: 5,
+    textAlign: 'right',
   },
+  container: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+  row: {
+    flexDirection: 'row'
+  }
 });
 
 export default App;
