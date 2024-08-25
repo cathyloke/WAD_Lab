@@ -1,62 +1,60 @@
 import React, { useState, useEffect } from 'react';
-import {StyleSheet, Alert, View} from 'react-native';
-import {ScrollView} from 'react-native-gesture-handler';
-import { InputWithLabel } from '../UI';
+import {Alert, Image, StyleSheet, ScrollView, View} from 'react-native';
+import {InputWithLabel} from '../UI';
 import {FloatingAction} from 'react-native-floating-action';
-let SQLite = require('react-native-sqlite-storage');
+
+let config = require('../Config');
 let common = require('../CommonData');
 
 const actions = [
   {
     text: 'Edit',
-    color: '#c80000',
+    color: '#cd5c5c',
     icon: require('../icons/edit_icon.png'),
     name: 'edit',
     position: 2,
   },
   {
     text: 'Delete',
-    color: '#c80000',
+    color: '#cd5c5c',
     icon: require('../icons/delete_icon.jpg'),
     name: 'delete',
     position: 1,
   },
 ];
 
-const openCallback = () => {
-    console.log('database open success');
+const ViewScreen = ({route, navigation}: any) => {
+
+  const [id, setId] = useState(route.params.id);
+  const [member, setMember] = useState<any>();
+
+  useEffect(()=>{
+    _loadByID();
+  },[]);
+
+
+  const _loadByID = () => {
+    let url = config.settings.serverPath + '/api/members/' + id;
+    console.log(url);
+    fetch(url)
+      .then(response => {
+        if (!response.ok) {
+          Alert.alert('Error:', response.status.toString());
+          throw Error('Error ' + response.status);
+        }
+        return response.json();
+      })
+      .then(member => {
+        setMember(member);
+        navigation.setOptions({headerTitle: member.name});
+      })
+      .catch(error => {
+        console.error(error);
+      });
   }
 
-const errorCallback = (err: any) => {
-    console.log('Error in opening the database: ' + err);
-}
-
-const ViewScreen = ({route, navigation} : any ) => {
-
-    let db = SQLite.openDatabase(
-        {name: 'db.sqlite', createFromLocation: '~db.sqlite'},
-        openCallback,
-        errorCallback,
-    )
-
-    const [studentID, setStudentID] = useState(route.params.id);
-    const [student, setStudent] = useState<any>(null);
-
-    const _queryByID = (id: any) => {
-        try {
-            db.executeSql(`SELECT * FROM students WHERE id=${id}`,[],(results:any) => {
-              if (results.rows.length) {
-                  setStudent(results.rows.item(0));
-                }
-            });
-          } catch (error) {
-            console.error(error);
-            throw Error('Failed to get the student !!!');
-          }
-    }
-
-    const _delete = () => {
-    Alert.alert('Confirm to delete ?', student.name, [
+  const _delete = () => {
+    Alert.alert('Confirm to DELETE', member.name, [
       {
         text: 'No',
         onPress: () => {},
@@ -64,91 +62,125 @@ const ViewScreen = ({route, navigation} : any ) => {
       {
         text: 'Yes',
         onPress: () => {
-            db.executeSql('DELETE FROM students WHERE id = ?', [studentID]);
-            route.params.refresh();
-            navigation.goBack();
+          let url =
+            config.settings.serverPath + '/api/members/' + id;
+          console.log(url);
+          fetch(url, {
+            method: 'DELETE',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({id: id}),
+          })
+            .then(response => {
+              if (!response.ok) {
+                Alert.alert('Error:', response.status.toString());
+                throw Error('Error ' + response.status);
+              }
+              return response.json();
+            })
+            .then(responseJson => {
+              if (responseJson.affected == 0) {
+                Alert.alert('Error in DELETING');
+              }
+            })
+            .catch(error => {
+              console.error(error);
+            });
+          route.params._refresh();
+          navigation.goBack();
         },
       },
     ]);
   }
 
-    useEffect(()=>{
-      _queryByID(studentID);
-    },[]);
-
-    return (
-      <View style={styles.container}>
-        <ScrollView>
+    //console.log(member);
+    if (member) {
+      return (
+        <ScrollView style={{flex: 1, margin: 10}}>
           <InputWithLabel
-            textLabelStyle={styles.TextLabel}
-            textInputStyle={styles.TextInput}
-            label={'Name'}
-            value={student ? student.name : ''}
-            orientation={'vertical'}
+            textInputStyle={styles.input}
+            textLabelStyle={styles.label}
             editable={false}
-          />
+            label="Name:">
+            {member.name ? member.name : 'No information'}
+          </InputWithLabel>
           <InputWithLabel
-            textLabelStyle={styles.TextLabel}
-            textInputStyle={styles.TextInput}
-            label={'Email'}
-            value={student ? student.email : ''}
-            orientation={'vertical'}
+            textInputStyle={styles.input}
+            textLabelStyle={styles.label}
             editable={false}
-          />
+            label="Email:">
+            {member.email ? member.email : 'No information'}
+          </InputWithLabel>
           <InputWithLabel
-            textLabelStyle={styles.TextLabel}
-            textInputStyle={styles.TextInput}
-            label={'State'}
-            value={student ? common.getValue(common.states, student.state) : ''}
-            orientation={'vertical'}
+            textInputStyle={styles.input}
+            textLabelStyle={styles.label}
             editable={false}
-          />
+            label="Phone:">
+            {member.phone ? member.phone : 'No information'}
+          </InputWithLabel>
+          <InputWithLabel
+            textInputStyle={styles.input}
+            textLabelStyle={styles.label}
+            editable={false}
+            label="Address:">
+            {member.address ? member.address : 'No information'}
+          </InputWithLabel>
+          <InputWithLabel
+            textInputStyle={styles.input}
+            textLabelStyle={styles.label}
+            editable={false}
+            label="Postcode:">
+            {member.postcode ? member.postcode : 'No information'}
+          </InputWithLabel>
+          <InputWithLabel
+            textInputStyle={styles.input}
+            textLabelStyle={styles.label}
+            editable={false}
+            label="City:">
+            {member.city ? member.city : 'No information'}
+          </InputWithLabel>
+          <InputWithLabel
+            textInputStyle={styles.input}
+            textLabelStyle={styles.label}
+            editable={false}
+            label="State:">
+            {member.state
+              ? common.getValue(common.states, member.state)
+              : 'No information'}
+          </InputWithLabel>
+          <FloatingAction
+            actions={actions}
+            color="#cd5c5c"
+            onPressItem={name => {
+              switch (name) {
+                case 'edit':
+                  navigation.navigate('Edit', {
+                    id: member.id,
+                    _refresh: _loadByID,
+                    homeRefresh: route.params._refresh,
+                  });
+                  break;
+                case 'delete':
+                  _delete();
+                  break;
+              }
+            }}></FloatingAction>
         </ScrollView>
-        <FloatingAction
-          actions={actions}
-          color={'#a80000'} //   floatingIcon={( //     <Image //       source={require('./images/baseline_edit_white_18dp.png')} //     /> //   )}
-          onPressItem={name => {
-            switch (name) {
-              case 'edit':
-                navigation.navigate('EditScreen', {
-                  id: student ? student.id : 0,
-                  headerTitle: student ? student.name : '',
-                  refresh: _queryByID,
-                  homeRefresh: route.params.refresh,
-                });
-                break;
-              case 'delete':
-                _delete();
-                break;
-            }
-          }}
-        />
-      </View>
-    );
+      );
+    }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  TextLabel: {
-    flex: 1,
-    fontSize: 18,
+  label: {
     fontWeight: 'bold',
-    marginLeft: 3,
-    textAlignVertical: 'center',
+    color: 'darkblue',
+    fontSize: 15,
   },
 
-  TextInput: {
-    fontSize: 24,
+  input: {
     color: 'black',
-  },
-
-  pickerItemStyle: {
-    fontSize: 20,
-    color: '#000099',
   },
 });
 

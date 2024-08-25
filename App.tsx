@@ -1,52 +1,50 @@
 import React from 'react';
-import {StyleSheet} from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import HomeScreen from './sqlite_lec/Screens/HomeScreen';
-import ViewScreen from './sqlite_lec/Screens/ViewScreen';
-import CreateScreen from './sqlite_lec/Screens/CreateScreen';
-import EditScreen from './sqlite_lec/Screens/EditScreen';
+import {NavigationContainer} from '@react-navigation/native';
+import HomeScreen from './sqlite_lec/screens/HomeScreen';
+import CreateScreen from './sqlite_lec/screens/CreateScreen';
+import ViewScreen from './sqlite_lec/screens/ViewScreen';
+import EditScreen from './sqlite_lec/screens/EditScreen';
 
-const Stack = createStackNavigator();
+const stack = createStackNavigator();
 
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="HomeScreen"
+      <stack.Navigator initialRouteName="Home">
+        <stack.Screen
+          name="Home"
           component={HomeScreen}
-          options={styles.HeaderOptionsStyle}
-        />
-        <Stack.Screen
-          name="ViewScreen"
-          component={ViewScreen}
-          options={styles.HeaderOptionsStyle}
-        />
-        <Stack.Screen
-          name="CreateScreen"
+          options={styles.headerIndexStyle}/>
+        <stack.Screen
+          name="Create"
           component={CreateScreen}
-          options={styles.HeaderOptionsStyle}
-        />
-        <Stack.Screen
-          name="EditScreen"
+          options={styles.headerIndexStyle}/>
+        <stack.Screen
+          name="View"
+          component={ViewScreen}
+          options={styles.headerIndexStyle}/>
+        <stack.Screen
+          name="Edit"
           component={EditScreen}
-          options={styles.HeaderOptionsStyle}
-        />
-      </Stack.Navigator>
+          options={styles.headerIndexStyle}/>
+      </stack.Navigator>
     </NavigationContainer>
   );
 }
-const styles = {
-  HeaderOptionsStyle: {
+
+const styles = ({
+  headerIndexStyle: {
+    title: 'Lecture  05: Cloud Conectivity',
     headerStyle: {
       backgroundColor: '#a80000',
     },
+    headerTitleAlign: 'center',
     headerTintColor: '#fff',
     headerTitleStyle: {
       fontWeight: 'bold',
     },
   },
-};
+});
 
 export default App;

@@ -1,120 +1,91 @@
 import React, { useState, useEffect } from 'react';
-import {View, Text, StyleSheet, TouchableHighlight} from 'react-native';
-import {FlatList} from 'react-native-gesture-handler';
+import {
+  Text,
+  FlatList,
+  View,
+  TouchableNativeFeedback,
+  Alert,
+} from 'react-native';
 import {FloatingAction} from 'react-native-floating-action';
-let common = require('../CommonData');
-let SQLite = require('react-native-sqlite-storage');
 
-const actions = [
+let config = require('../Config');
+
+const action = [
   {
     text: 'Add',
     icon: require('../icons/add_icon.png'),
     name: 'add',
     position: 1,
+    color: '#cd5c5c',
   },
 ];
 
-const openCallback = () => {
-    console.log('database open success');
-  }
+const HomeScreen = ({route, navigation}: any) => {
 
-const errorCallback = (err: any) => {
-console.log('Error in opening the database: ' + err);
-}
+    const [members, setMembers] = useState([]);
+    const [isFetching, setIsFetching] = useState(false);
 
-const HomeScreen = ({route, navigation} : any ) => {
 
-    const [students, setStudents] = useState<any>([]);
+    const _load = () => {
+        let url = config.settings.serverPath + '/api/members';
+        setIsFetching(true);
 
-    let db = SQLite.openDatabase(
-        {name: 'db.sqlite', createFromLocation: '~db.sqlite'},
-        openCallback,
-        errorCallback,
-    )
-
-  const _query = () => {
-    try{
-        const studentData:any = [];
-        db.executeSql('SELECT * FROM students ORDER BY name',[], (results:any) => {
-          (results.rows.raw()).forEach(( item:any ) => {
-            studentData.push(item);
-          })
-          setStudents(studentData);
+        fetch(url)
+        .then(response => {
+            console.log(response);
+            if (!response.ok) {
+            Alert.alert('Error:', response.status.toString());
+            throw Error('Error ' + response.status);
+            }
+            setIsFetching(false);
+            return response.json();
+        })
+        .then(members => {
+            console.log(members);
+            setMembers(members);
+        })
+        .catch(error => {
+            console.log(error);
         });
-      } catch (error) {
-        console.error(error);
-        throw Error('Failed to get students !!!');
-      }
-  }
+    }
 
     useEffect(()=>{
-      _query();
+        _load();
     },[]);
 
     return (
-      <View style={styles.container}>
+      <View style={{flex: 1, margin: 5}}>
         <FlatList
-          data={students}
-          showsVerticalScrollIndicator={true}
-          renderItem={({item}:any) => (
-            <TouchableHighlight
-              underlayColor="pink"
-              onPress={() => {
-                  navigation.navigate('ViewScreen', {
-                  id: item.id,
-                  headerTitle: item.name,
-                  refresh: _query,
-                });
-              }}>
-              <View style={styles.item}>
-                <Text style={styles.itemTitle}>{item.name}</Text>
-                <Text style={styles.itemSubtitle}>
-                  {common.getValue(common.states, item.state)}
-                </Text>
-              </View>
-            </TouchableHighlight>
-          )}
-          keyExtractor={ (item:any) => 
-            item.id.toString()
-          }
-        />
+          refreshing={isFetching}
+          onRefresh={_load}
+          data={members}
+          renderItem={({item}:any) => {
+            return (
+              <TouchableNativeFeedback
+                onPress={() =>
+                  navigation.navigate('View', {
+                    id: item.id,
+                    _refresh: _load,
+                  })
+                }>
+                <View style={{borderBottomWidth: 1, borderBottomColor: 'grey'}}>
+                  <Text style={{fontSize: 20, fontWeight: 'bold'}}>
+                    {item.name}
+                  </Text>
+                  <Text style={{fontSize: 15}}>{item.email}</Text>
+                  <Text style={{fontSize: 15}}>{item.phone}</Text>
+                </View>
+              </TouchableNativeFeedback>
+            );
+          }}></FlatList>
         <FloatingAction
-          actions={actions}
-          overrideWithAction={true}
-          color={'#a80000'}
-          onPressItem={() => {
-              navigation.navigate('CreateScreen', {
-              refresh: _query,
-            });
-          }}
-        />
+          actions={action}
+          color="#cd5c5c"
+          onPressItem={() =>
+            navigation.navigate('Create', {_refresh: _load})
+          }></FloatingAction>
       </View>
     );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    backgroundColor: '#fff',
-  },
-  item: {
-    justifyContent: 'center',
-    paddingTop: 10,
-    paddingBottom: 10,
-    paddingLeft: 25,
-    paddingRight: 25,
-    borderBottomWidth: 1,
-    borderColor: '#ccc',
-  },
-  itemTitle: {
-    fontSize: 22,
-    fontWeight: '500',
-    color: '#000',
-  },
-  itemSubtitle: {
-    fontSize: 18,
-  },
-});
 
 export default HomeScreen;
