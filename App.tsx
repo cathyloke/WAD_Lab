@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TextInput, Text, ScrollView, TouchableNativeFeedback } from 'react-native';
 import {InputWithLabel, PickerWithLabel} from './UI';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 let animalsData = [
   {
@@ -26,14 +27,30 @@ const App = () => {
   const [animal,setAnimal] = useState('112');
   const [selectedAnimalCode,setSelectedAnimalCode] = useState('');
 
+  const _readSettings = async(key:any) => {
+    try {
+      let value = await AsyncStorage.getItem(key);
+      setSelectedAnimalCode(value);
+      
+    } catch(error) {
+      console.error(error);
+    }
+  }
+
   useEffect(()=>{                           //animal list
     setAnimals(animalsData);
   },[]);
 
-  const handleShowCode = () => {            //function to handle when the TouchableNativeFeedback was click
-    const selectedAnimal = animals.find( (item:any) => item.key === animal);
+  const handleShowCode = async() => {            //function to handle when the TouchableNativeFeedback was click
+    try {
+      const selectedAnimal = animals.find( (item:any) => item.key === animal);
     if (selectedAnimal) {
       setSelectedAnimalCode(selectedAnimal.value);
+      await AsyncStorage.setItem('@code',selectedAnimal.value)
+    } 
+      
+    } catch(error) {
+      console.error(error);
     }
   };
 
