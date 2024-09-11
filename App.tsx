@@ -1,117 +1,119 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
+  PermissionsAndroid,
   StyleSheet,
   Text,
-  useColorScheme,
-  View,
+  View
 } from 'react-native';
+import { InputWithLabel } from './UI';
+import Geolocation from '@react-native-community/geolocation';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const requestLocationPermission = async() => {
+    try {
+        const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            {
+                'title': 'Geolocation Permission Required',
+                'message': 'This app needs to access your device location',
+            }
+        )
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            console.log('Location permission granted')
+        }
+        else {
+            console.log('Location permission denied')
+        }
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
+        return granted
+    }
+    catch (err) {
+        console.warn(err)
+    }
 }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+var watchID:any = null;
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+const App = () => {
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+  const [granted, setGranted] = useState<any>(PermissionsAndroid.RESULTS.DENIED);
+  const [position, setPosition] = useState<any>(null);
+
+
+  useEffect(()=>{
+    setGranted(requestLocationPermission());
+
+    if(granted) readLocation();
+
+    return () => {
+      Geolocation.clearWatch(watchID);          //CLEAR MEMORY USAGE
+    }
+  },[]);
+
+  const readLocation = () => {
+    Geolocation.getCurrentPosition(
+         (position) => setPosition(position),
+         (error) => console.log(error.message),
+         {
+             enableHighAccuracy: true,
+             timeout: 20000,
+             maximumAge: 1000
+         }
+     );
+
+    watchID = Geolocation.watchPosition(
+         (position) =>  setPosition(position),
+         (error) => console.log(error.message),
+         {
+             enableHighAccuracy: true,
+             timeout: 20000,
+             maximumAge: 1000
+         }
+     );
+ }
+
+    console.log(position)
+    return (
+      <>
+      <InputWithLabel 
+        label="Longitude: "
+        value={(position) ? position.coords.longitude.toString():"Unknown"}
+        editable = {false}
+        orientation='horizontal'
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+      <InputWithLabel 
+        label="Latitude: "
+        value={(position) ? position.coords.latitude.toString():"Unknown"}
+        editable = {false}
+        orientation='horizontal'
+      />
+      <InputWithLabel 
+        label="Altitude: "
+        value={(position) ? position.coords.altitude.toString():"Unknown"}
+        editable = {false}
+        orientation='horizontal'
+      />
+      </>
+    );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5FCFF',
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
+  label: {
     fontSize: 18,
-    fontWeight: '400',
+    textAlign: 'center',
+    margin: 10,
   },
-  highlight: {
-    fontWeight: '700',
+  data: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    margin: 10,
   },
 });
 
