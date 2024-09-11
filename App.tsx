@@ -18,7 +18,7 @@ const App = () => {
           OpenMap({latitude: 3.0402, longitude: 101.7644})
         }}
       />            
-      {/* theme, title, onpress, onlongpress */}
+      
       <AppButton
         title="Kampar"
         onPress = {()=> {
